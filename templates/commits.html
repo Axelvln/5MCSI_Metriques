@@ -7,66 +7,81 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <h1>Graphique des Commits par Minute</h1>
+    <h1>Graphique des Commits (minute par minute)</h1>
     <canvas id="commitChart" width="400" height="200"></canvas>
 
     <script>
-        // Fonction pour formater les dates
-        function formatCommitTime(date) {
-            const options = { hour: '2-digit', minute: '2-digit' };
-            return new Date(date).toLocaleTimeString('fr-FR', options);
+        // Fonction pour récupérer les commits de l'API GitHub
+        async function fetchCommits() {
+            const response = await fetch('https://api.github.com/repos/Axelvln/5MCSI_Metriques/commits');
+            const commits = await response.json();
+            return commits;
         }
 
-        // Récupérer les commits via l'API GitHub
-        fetch('https://api.github.com/repos/Axelvln/5MCSI_Metriques/commits')
-            .then(response => response.json())
-            .then(data => {
-                const commitTimes = data.map(commit => commit.commit.author.date);
-                const formattedTimes = commitTimes.map(time => formatCommitTime(time));
+        // Fonction pour extraire la minute de chaque commit
+        function extractCommitMinutes(commits) {
+            const commitMinutes = {};
+            
+            commits.forEach(commit => {
+                const commitDate = new Date(commit.commit.author.date);
+                const minute = `${commitDate.getHours()}:${commitDate.getMinutes()}`;
+                
+                // Incrémenter la quantité de commits pour chaque minute
+                if (commitMinutes[minute]) {
+                    commitMinutes[minute]++;
+                } else {
+                    commitMinutes[minute] = 1;
+                }
+            });
+            
+            return commitMinutes;
+        }
 
-                // Compter le nombre de commits par minute
-                const commitCount = formattedTimes.reduce((acc, time) => {
-                    acc[time] = (acc[time] || 0) + 1;
-                    return acc;
-                }, {});
-
-                const labels = Object.keys(commitCount);
-                const commitData = Object.values(commitCount);
-
-                // Créer le graphique
-                const ctx = document.getElementById('commitChart').getContext('2d');
-                const commitChart = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: 'Nombre de commits par minute',
-                            data: commitData,
-                            borderColor: 'rgba(75, 192, 192, 1)',
-                            borderWidth: 1,
-                            fill: false
-                        }]
-                    },
-                    options: {
-                        scales: {
-                            x: {
-                                title: {
-                                    display: true,
-                                    text: 'Temps (minute par minute)'
-                                }
-                            },
-                            y: {
-                                title: {
-                                    display: true,
-                                    text: 'Nombre de commits'
-                                },
-                                beginAtZero: true
+        // Fonction pour afficher le graphique
+        function displayChart(commitMinutes) {
+            const ctx = document.getElementById('commitChart').getContext('2d');
+            const labels = Object.keys(commitMinutes);
+            const data = Object.values(commitMinutes);
+            
+            const chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Commits par minute',
+                        data: data,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1,
+                        fill: false
+                    }]
+                },
+                options: {
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Heure:Minute'
                             }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Nombre de commits'
+                            },
+                            beginAtZero: true
                         }
                     }
-                });
-            })
-            .catch(error => console.error('Erreur:', error));
+                }
+            });
+        }
+
+        // Récupérer les commits et afficher le graphique
+        fetchCommits().then(commits => {
+            const commitMinutes = extractCommitMinutes(commits);
+            displayChart(commitMinutes);
+        }).catch(error => {
+            console.error('Erreur lors de la récupération des commits:', error);
+        });
     </script>
 </body>
 </html>
