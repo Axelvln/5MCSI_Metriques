@@ -1,50 +1,73 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    <script type="text/javascript">
-      // Charger la bibliothèque Google Charts
-      google.charts.load('current', {'packages':['corechart']});
-      google.charts.setOnLoadCallback(drawChart);
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weather Histogram</title>
+  <!-- Google Charts loader -->
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  
+  <script type="text/javascript">
+    // Sample data from OpenWeatherMap API (simplified)
+    const weatherData = {
+      "list": [
+        {"dt":1485799200,"main":{"temp":283.76},"dt_txt":"2017-01-30 18:00:00"},
+        {"dt":1485810000,"main":{"temp":282.56},"dt_txt":"2017-01-30 21:00:00"},
+        {"dt":1485820800,"main":{"temp":282.3},"dt_txt":"2017-01-31 00:00:00"},
+        {"dt":1485831600,"main":{"temp":282.27},"dt_txt":"2017-01-31 03:00:00"},
+        {"dt":1485842400,"main":{"temp":282.66},"dt_txt":"2017-01-31 06:00:00"},
+        {"dt":1485853200,"main":{"temp":282.78},"dt_txt":"2017-01-31 09:00:00"},
+        // Add more entries if needed
+      ]
+    };
 
-      function drawChart() {
-        // Exemple de données JSON (remplacez ceci par l'URL fetch si nécessaire)
-        var jsonData = {
-          "cod": "200",
-          "list": [
-            {"dt_txt": "2017-01-30 18:00:00", "main": {"temp_min": 283.76, "temp_max": 283.761}},
-            {"dt_txt": "2017-01-30 21:00:00", "main": {"temp_min": 282.56, "temp_max": 282.563}},
-            {"dt_txt": "2017-01-31 00:00:00", "main": {"temp_min": 282.3, "temp_max": 282.3}},
-            // Ajoutez plus de données ici
-          ]
-        };
+    // Function to extract data
+    function extractWeatherData(data) {
+      return data.list.map(item => {
+        return [new Date(item.dt_txt), item.main.temp];
+      });
+    }
 
-        // Extraire et formater les données pour Google Charts
-        var data = new google.visualization.DataTable();
-        data.addColumn('string', 'Date');
-        data.addColumn('number', 'Température Min');
-        data.addColumn('number', 'Température Max');
+    // Load Google Charts
+    google.charts.load('current', { packages: ['corechart', 'bar'] });
+    google.charts.setOnLoadCallback(drawChart);
 
-        jsonData.list.forEach(function(entry) {
-          data.addRow([entry.dt_txt, entry.main.temp_min, entry.main.temp_max]);
-        });
+    // Draw the chart
+    function drawChart() {
+      const weatherArray = extractWeatherData(weatherData);
+      const data = new google.visualization.DataTable();
+      
+      // Define columns
+      data.addColumn('datetime', 'Time');
+      data.addColumn('number', 'Temperature (K)');
+      
+      // Add rows
+      data.addRows(weatherArray);
 
-        // Options du graphique
-        var options = {
-          title: 'Prévisions de Température',
-          curveType: 'function',
-          legend: { position: 'bottom' },
-          hAxis: { title: 'Date' },
-          vAxis: { title: 'Température (K)' }
-        };
+      // Define chart options
+      const options = {
+        title: 'Temperature over Time',
+        hAxis: {
+          title: 'Time',
+          format: 'MMM dd, HH:mm',
+          slantedText: true
+        },
+        vAxis: {
+          title: 'Temperature (Kelvin)'
+        },
+        bars: 'vertical',
+        height: 400
+      };
 
-        // Dessiner le graphique
-        var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
-        chart.draw(data, options);
-      }
-    </script>
-  </head>
-  <body>
-    <div id="curve_chart" style="width: 900px; height: 500px"></div>
-  </body>
+      // Create and draw the chart
+      const chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+      chart.draw(data, options);
+    }
+  </script>
+</head>
+<body>
+  <h1>Weather Temperature Histogram</h1>
+  <!-- Div for the chart -->
+  <div id="chart_div" style="width: 100%; height: 500px;"></div>
+</body>
 </html>
