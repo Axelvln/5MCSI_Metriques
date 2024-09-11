@@ -114,4 +114,61 @@
                             backgroundColor: 'rgba(0, 0, 0, 0.7)',
                             titleFont: {
                                 size: 16,
-           
+                                weight: 'bold'
+                            },
+                            bodyFont: {
+                                size: 14
+                            },
+                            cornerRadius: 5
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: '#eaeaea'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Heure:Minute',
+                                color: '#666',
+                                font: {
+                                    size: 16
+                                }
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: '#eaeaea'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Nombre de commits',
+                                color: '#666',
+                                font: {
+                                    size: 16
+                                }
+                            },
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Récupérer les commits et afficher le graphique
+        fetchCommits().then(commits => {
+            if (commits && commits.length > 0) {
+                const commitMinutes = extractCommitMinutes(commits);
+                displayChart(commitMinutes);
+            } else {
+                document.getElementById('error-message').textContent = "Aucun commit récupéré.";
+            }
+        }).catch(error => {
+            console.error('Erreur lors de la récupération des commits:', error);
+        });
+    </script>
+</body>
+</html>
