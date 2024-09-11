@@ -5,10 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Graphique des Commits</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            background-color: #f4f4f9;
+        }
+        h1 {
+            color: #333;
+        }
+        canvas {
+            max-width: 80%;
+            margin: 20px;
+        }
+    </style>
 </head>
 <body>
     <h1>Graphique des Commits (minute par minute)</h1>
-    <canvas id="commitChart" width="400" height="200"></canvas>
+    <canvas id="commitChart" width="600" height="300"></canvas>
     <p id="error-message" style="color:red;"></p>
 
     <script>
@@ -37,7 +55,7 @@
 
             commits.forEach(commit => {
                 const commitDate = new Date(commit.commit.author.date);
-                const minute = `${commitDate.getHours()}:${commitDate.getMinutes().toString().padStart(2, '0')}`;  // Formate les minutes
+                const minute = `${commitDate.getHours()}:${commitDate.getMinutes().toString().padStart(2, '0')}`;
 
                 // Incrémenter la quantité de commits pour chaque minute
                 if (commitMinutes[minute]) {
@@ -50,7 +68,7 @@
             return commitMinutes;
         }
 
-        // Fonction pour afficher le graphique
+        // Fonction pour afficher le graphique avec un style personnalisé
         function displayChart(commitMinutes) {
             const ctx = document.getElementById('commitChart').getContext('2d');
             const labels = Object.keys(commitMinutes);
@@ -70,41 +88,30 @@
                         label: 'Commits par minute',
                         data: data,
                         borderColor: 'rgba(75, 192, 192, 1)',
-                        borderWidth: 1,
-                        fill: false
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(54, 162, 235, 1)',
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        pointBorderColor: '#fff',
+                        pointHoverBorderColor: 'rgba(220,220,220,1)',
+                        tension: 0.3  // Pour lisser les courbes
                     }]
                 },
                 options: {
-                    scales: {
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Heure:Minute'
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                font: {
+                                    size: 14,
+                                    family: 'Arial, sans-serif'
+                                },
+                                color: '#333'
                             }
                         },
-                        y: {
-                            title: {
-                                display: true,
-                                text: 'Nombre de commits'
-                            },
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
-        }
-
-        // Récupérer les commits et afficher le graphique
-        fetchCommits().then(commits => {
-            if (commits && commits.length > 0) {
-                const commitMinutes = extractCommitMinutes(commits);
-                displayChart(commitMinutes);
-            } else {
-                document.getElementById('error-message').textContent = "Aucun commit récupéré.";
-            }
-        }).catch(error => {
-            console.error('Erreur lors de la récupération des commits:', error);
-        });
-    </script>
-</body>
-</html>
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                            titleFont: {
+                                size: 16,
+           
