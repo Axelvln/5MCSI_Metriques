@@ -30,6 +30,10 @@ def monhistogramme():
 @app.route("/contact/")
 def moncontact():
     return render_template("contact.html")
+  
+@app.route("/commits/")
+def moncommits():
+    return render_template("commits.html")
                                                                                                                                        
 @app.route('/')
 def hello_world():
