@@ -47,7 +47,7 @@ def show_commits():
     return render_template('commits.html', chart_data=data)
 
 def get_commits():
-    url = "https://api.github.com/repos/blablapola/5MCSI_Metriques/commits"
+    url = "https://api.github.com/repos/Axelvln/5MCSI_Metriques/commits"
     
     # Utiliser urllib pour faire une requête GET
     response = urlopen(url)
