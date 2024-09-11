@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graphique des Commits</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Graphique des Commits par Minute</h1>
+    <canvas id="commitChart" width="400" height="200"></canvas>
+
+    <script>
+        // Fonction pour formater les dates
+        function formatCommitTime(date) {
+            const options = { hour: '2-digit', minute: '2-digit' };
+            return new Date(date).toLocaleTimeString('fr-FR', options);
+        }
+
+        // Récupérer les commits via l'API GitHub
+        fetch('https://api.github.com/repos/Axelvln/5MCSI_Metriques/commits')
+            .then(response => response.json())
+            .then(data => {
+                const commitTimes = data.map(commit => commit.commit.author.date);
+                const formattedTimes = commitTimes.map(time => formatCommitTime(time));
+
+                // Compter le nombre de commits par minute
+                const commitCount = formattedTimes.reduce((acc, time) => {
+                    acc[time] = (acc[time] || 0) + 1;
+                    return acc;
+                }, {});
+
+                const labels = Object.keys(commitCount);
+                const commitData = Object.values(commitCount);
+
+                // Créer le graphique
+                const ctx = document.getElementById('commitChart').getContext('2d');
+                const commitChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Nombre de commits par minute',
+                            data: commitData,
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1,
+                            fill: false
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Temps (minute par minute)'
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: 'Nombre de commits'
+                                },
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            })
+            .catch(error => console.error('Erreur:', error));
+    </script>
+</body>
+</html>
